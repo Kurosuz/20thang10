@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trang web của tôi</title>
+	
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fleur+De+Leah&family=Rouge+Script&display=swap" rel="stylesheet">
+	
+    <style>
+        body {
+            /* XÓA "pointer-events: none;" ở đây để nút bấm hoạt động */
+            background-color: black;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+	    justify-content: center;
+        }
+
+        /* Nút bấm để "mở khóa" âm thanh */
+        #play-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            font-size: 20px;
+            z-index: 10;
+        }
+	
+	#container {
+            width: 200px; /* Kích thước bằng con mèo */
+            height: 150px;
+            position: relative; /* Quan trọng: để các ảnh con xếp chồng */
+            
+            /* Đặt vị trí ban đầu (giống 0% của keyframe) */
+            transform: translateX(-56vw) translateY(0) scale(1);
+        }
+
+        /* 2. CON MÈO */
+        /* Nó nằm bên trong khung */
+        #meo {
+            width: 100%;
+            height: 100%;
+            position: absolute; /* Xếp chồng */
+            top: 0;
+            left: 0;
+            z-index: 1; /* Lớp dưới */
+	    display: block;
+        }
+
+	#meo.hide {
+    	    display: none;
+	}
+
+	#meo.show {
+	    display: block;
+	}
+
+	/* ẢNH GIF CỦA BẠN */
+	#spin {
+    	    width: 150%; /* Giống kích thước con mèo */
+    	    height: 150%; /* Giống kích thước con mèo */
+    	    position: absolute; /* Xếp chồng */
+    	    top: -50px; /* Vị trí giống con mèo */
+    	    left: -3vw; /* Vị trí giống con mèo */
+    	    z-index: 2; /* Đặt cao hơn con mèo */
+    	    display: none; /* ẨN ban đầu */
+       	    pointer-events: none; /* Đảm bảo không chặn click */
+	}
+
+	/* CLASS ĐỂ HIỆN ẢNH GIF */
+	#spin.show {
+    	    display: block;
+	}
+
+	#spin.hide {
+	    display: none;
+	}
+
+        /* 3. BÀN TAY */
+        /* Nó cũng nằm bên trong khung */
+        #point {
+            width: 50%; /* Kích thước bằng con mèo để căn khớp */
+            height: 50%;
+            position: absolute; /* Xếp chồng */
+            top: 40px;
+            left: 10vw;
+            display: none; /* Ẩn ban đầu */
+            z-index: 5; /* Lớp trên */
+        }
+
+        /* Class này dùng để hiện bàn tay (ngay lập tức) */
+        #point.show {
+            display: inline-block; 
+        }
+	
+	#rose {
+            width: 50%; /* Kích thước bằng con mèo để căn khớp */
+            height: 50%;
+            position: absolute; /* Xếp chồng */
+            top: 30px;
+            left: 1vw;
+            display: none; /* Ẩn ban đầu */
+            z-index: 5; /* Lớp trên */
+        }
+	
+	#rose.show {
+            display: inline-block; 
+            
+            /* -- THÊM 4 DÒNG NÀY -- */
+            animation-name: slide-up;
+            animation-duration: 0.5s; /* Hiệu ứng chạy trong 0.5 giây */
+            animation-fill-mode: forwards; /* Giữ trạng thái cuối */
+            animation-timing-function: ease-out; /* Mượt mà */
+        }
+
+        /* Đây là "công tắc" để chạy animation */
+        .run-animation {
+            animation-name: di-chuyen;
+            animation-duration: 100s; 
+            animation-iteration-count: 1;
+            animation-fill-mode: forwards;
+            animation-timing-function: linear;
+        }
+
+	#text1 {
+            position: absolute; /* SỬA: Cần 'relative' để giữ con trỏ */
+            top: 0px;
+            right: 120px; 
+            color: #ff2b88;
+            font-size: 70px;
+            font-family: "Dancing Script", cursive;
+  	    font-weight: 700;
+  	    font-style: normal;
+            display: none; 
+            z-index: 10;
+            white-space: nowrap; /* Giữ dòng này */
+            
+            /* SỬA: Ẩn bằng mặt nạ, không phải overflow */
+            clip-path: polygon(0 0, 0 0, 0 100%, 0 100%); 
+	    /* 1. Đặt độ dày cho viền (ví dụ: 2px) */
+            -webkit-text-stroke-width: 1px; 
+        
+            /* 2. Đặt màu cho viền (sẽ bị gradient đè lên) */
+            -webkit-text-stroke-color: #f50075;
+	    filter: drop-shadow(0 0 2px #f50075);
+        }
+
+	#text2 {
+            position: absolute; /* SỬA: Cần 'relative' để giữ con trỏ */
+            top: -10px;
+            right: 120px; 
+            font-size: 150px;
+            font-family: "Fleur De Leah", cursive;
+  	    font-weight: 400;
+  	    font-style: normal;
+            display: none; 
+            z-index: 10;
+	    background: linear-gradient(
+    	    to right,
+    	    #ff186a,
+    	    #ff0070,
+   	    #ff2020,
+   	    #f50000,
+    	    #f50058
+  	    );
+  	    background-size: 200%;
+  	    background-clip: text;
+  	    -webkit-background-clip: text;
+  	    -webkit-text-fill-color: transparent;
+	    opacity: 0;
+            /* 1. Đặt độ dày cho viền (ví dụ: 2px) */
+            -webkit-text-stroke-width: 2px; 
+        
+            /* 2. Đặt màu cho viền (sẽ bị gradient đè lên) */
+            -webkit-text-stroke-color: #f50075;
+	    filter: drop-shadow(0 0 5px #f50075);
+        }
+
+	/* THÊM KHỐI MỚI NÀY */
+        #text1::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0; /* Bắt đầu ở bên trái */
+            
+            /* Định dạng con trỏ */
+            width: 3px;
+            background-color: pink;
+            
+            /* Ẩn lúc đầu */
+            opacity: 0;
+        }	
+
+        /* 1. Kích hoạt animation cho CHỮ (mặt nạ) */
+        #text1.show-text {
+            display: block; 
+            
+            /* Chạy kịch bản "reveal-text" */
+            animation: reveal-text 1.5s steps(15) forwards; 
+        }
+
+	#text2.show-text {
+	    display: block;
+            animation: 
+		fade-in 1s forwards,
+	    	animate-gradient 2.5s linear infinite;
+        }
+
+        /* 2. Kích hoạt animation cho CON TRỎ */
+        #text1.show-text::before {
+            opacity: 1; /* Hiện con trỏ */
+            
+            /* Chạy kịch bản "move-cursor" VÀ "blink" */
+            animation: move-cursor 1.5s steps(15) forwards,
+                         blink 0.75s step-end infinite;
+        }
+
+	#text3 {
+            position: absolute; /* SỬA: Cần 'relative' để giữ con trỏ */
+            top: 230px;
+            right: 150px; 
+            color: #ff2b88;
+            font-size: 50px;
+            font-family: "Dancing Script", cursive;
+  	    font-weight: 700;
+  	    font-style: normal;
+            display: none; 
+            z-index: 10;
+            white-space: nowrap; /* Giữ dòng này */
+            
+            /* SỬA: Ẩn bằng mặt nạ, không phải overflow */
+            clip-path: polygon(0 0, 0 0, 0 100%, 0 100%); 
+	    /* 1. Đặt độ dày cho viền (ví dụ: 2px) */
+            -webkit-text-stroke-width: 2px; 
+        
+            /* 2. Đặt màu cho viền (sẽ bị gradient đè lên) */
+            -webkit-text-stroke-color: #f50075;
+	    filter: drop-shadow(0 0 5px #f50075);
+        }
+	
+	/* THÊM KHỐI MỚI NÀY */
+        #text3::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0; /* Bắt đầu ở bên trái */
+            
+            /* Định dạng con trỏ */
+            width: 3px;
+            background-color: pink;
+            
+            /* Ẩn lúc đầu */
+            opacity: 0;
+        }	
+
+        /* 1. Kích hoạt animation cho CHỮ (mặt nạ) */
+        #text3.show-text {
+            display: block; 
+            
+            /* Chạy kịch bản "reveal-text" */
+            animation: reveal-text 1s steps(5) forwards; 
+        }
+	
+	/* 2. Kích hoạt animation cho CON TRỎ */
+        #text3.show-text::before {
+            opacity: 1; /* Hiện con trỏ */
+            
+            /* Chạy kịch bản "move-cursor" VÀ "blink" */
+            animation: move-cursor 1s steps(5) forwards,
+                         blink 0.75s step-end infinite;
+        }
+	
+	#text4 {
+            position: absolute; /* SỬA: Cần 'relative' để giữ con trỏ */
+            top: 300px;
+            right: 150px; 
+            color: #ff2b88;
+            font-size: 50px;
+            font-family: "Dancing Script", cursive;
+  	    font-weight: 700;
+  	    font-style: normal;
+            display: none; 
+            z-index: 10;
+            white-space: nowrap; /* Giữ dòng này */
+            
+            /* SỬA: Ẩn bằng mặt nạ, không phải overflow */
+            clip-path: polygon(0 0, 0 0, 0 100%, 0 100%); 
+	    /* 1. Đặt độ dày cho viền (ví dụ: 2px) */
+            -webkit-text-stroke-width: 1px; 
+        
+            /* 2. Đặt màu cho viền (sẽ bị gradient đè lên) */
+            -webkit-text-stroke-color: #f50075;
+	    filter: drop-shadow(0 0 2px #f50075);
+        }
+	
+	/* THÊM KHỐI MỚI NÀY */
+        #text4::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0; /* Bắt đầu ở bên trái */
+            
+            /* Định dạng con trỏ */
+            width: 3px;
+            background-color: pink;
+            
+            /* Ẩn lúc đầu */
+            opacity: 0;
+        }	
+
+        /* 1. Kích hoạt animation cho CHỮ (mặt nạ) */
+        #text4.show-text {
+            display: block; 
+            
+            /* Chạy kịch bản "reveal-text" */
+            animation: reveal-text 1.5s steps(9) forwards; 
+        }
+	
+	/* 2. Kích hoạt animation cho CON TRỎ */
+        #text4.show-text::before {
+            opacity: 1; /* Hiện con trỏ */
+            
+            /* Chạy kịch bản "move-cursor" VÀ "blink" */
+            animation: move-cursor 1.5s steps(9) forwards,
+                         blink 0.75s step-end infinite;
+        }
+
+	#text5 {
+            position: absolute; /* SỬA: Cần 'relative' để giữ con trỏ */
+            top: 360px;
+            right: 150px; 
+            color: #ff2b88;
+            font-size: 50px;
+            font-family: "Dancing Script", cursive;
+  	    font-weight: 700;
+  	    font-style: normal;
+            display: none; 
+            z-index: 10;
+            white-space: nowrap; /* Giữ dòng này */
+            
+            /* SỬA: Ẩn bằng mặt nạ, không phải overflow */
+            clip-path: polygon(0 0, 0 0, 0 100%, 0 100%); 
+	    /* 1. Đặt độ dày cho viền (ví dụ: 2px) */
+            -webkit-text-stroke-width: 1px; 
+        
+            /* 2. Đặt màu cho viền (sẽ bị gradient đè lên) */
+            -webkit-text-stroke-color: #f50075;
+	    filter: drop-shadow(0 0 2px #f50075);
+        }
+	
+	/* THÊM KHỐI MỚI NÀY */
+        #text5::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0; /* Bắt đầu ở bên trái */
+            
+            /* Định dạng con trỏ */
+            width: 3px;
+            background-color: pink;
+            
+            /* Ẩn lúc đầu */
+            opacity: 0;
+        }	
+
+        /* 1. Kích hoạt animation cho CHỮ (mặt nạ) */
+        #text5.show-text {
+            display: block; 
+            
+            /* Chạy kịch bản "reveal-text" */
+            animation: reveal-text 1.5s steps(13) forwards; 
+        }
+	
+	/* 2. Kích hoạt animation cho CON TRỎ */
+        #text5.show-text::before {
+            opacity: 1; /* Hiện con trỏ */
+            
+            /* Chạy kịch bản "move-cursor" VÀ "blink" */
+            animation: move-cursor 1.5s steps(13) forwards,
+                         blink 0.75s step-end infinite;
+        }
+
+	#text6 {
+            position: absolute; /* SỬA: Cần 'relative' để giữ con trỏ */
+            top: 420px;
+            right: 150px; 
+            color: #ff2b88;
+            font-size: 50px;
+            font-family: "Dancing Script", cursive;
+  	    font-weight: 700;
+  	    font-style: normal;
+            display: none; 
+            z-index: 10;
+            white-space: nowrap; /* Giữ dòng này */
+            
+            /* SỬA: Ẩn bằng mặt nạ, không phải overflow */
+            clip-path: polygon(0 0, 0 0, 0 100%, 0 100%); 
+	    /* 1. Đặt độ dày cho viền (ví dụ: 2px) */
+            -webkit-text-stroke-width: 1px; 
+        
+            /* 2. Đặt màu cho viền (sẽ bị gradient đè lên) */
+            -webkit-text-stroke-color: #f50075;
+	    filter: drop-shadow(0 0 2px #f50075);
+        }
+	
+	/* THÊM KHỐI MỚI NÀY */
+        #text6::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0; /* Bắt đầu ở bên trái */
+            
+            /* Định dạng con trỏ */
+            width: 3px;
+            background-color: pink;
+            
+            /* Ẩn lúc đầu */
+            opacity: 0;
+        }	
+
+        /* 1. Kích hoạt animation cho CHỮ (mặt nạ) */
+        #text6.show-text {
+            display: block; 
+            
+            /* Chạy kịch bản "reveal-text" */
+            animation: reveal-text 1.5s steps(13) forwards; 
+        }
+	
+	/* 2. Kích hoạt animation cho CON TRỎ */
+        #text6.show-text::before {
+            opacity: 1; /* Hiện con trỏ */
+            
+            /* Chạy kịch bản "move-cursor" VÀ "blink" */
+            animation: move-cursor 1.5s steps(13) forwards,
+                         blink 0.75s step-end infinite;
+        }
+
+	#cre {
+   	    position: fixed; /* Keep it fixed relative to the viewport */
+    	    bottom: 20px;    /* 20px from the bottom */
+    	    left: 20px;      /* 20px from the left */
+    	    color: white;    /* Or any color you like */
+    	    font-size: 16px; /* Adjust size as needed */
+    	    font-family: sans-serif; /* A simple default font */
+    	    z-index: 100;    /* Make sure it's above almost everything */
+    	    /* DO NOT add display: none or opacity: 0 */
+    	    /* DO NOT add animations */
+	}
+	
+	/* 1. KHUNG CHỨA CÁNH HOA */
+	#petal-container {
+    	    position: fixed; /* Che toàn bộ màn hình */
+   	    top: 0;
+    	    left: 0;
+    	    width: 100%;
+    	    height: 100%;
+    	    overflow: hidden; /* Ẩn cánh hoa khi ra khỏi màn hình */
+    	    z-index: 0; /* Đặt nó SAU CÙNG (sau nút bấm và con mèo) */
+    
+    	    /* QUAN TRỌNG: Để nó không chặn nút bấm */
+    	    pointer-events: none; 
+	}
+
+	/* 2. KIỂU DÁNG CỦA MỘT CÁNH HOA */
+	#petal-container > div {
+    	    position: absolute;
+    	    top: -10%; /* Bắt đầu ở trên màn hình */
+    	    font-size: 24px;
+    	    color: #ffb7c5; /* Màu hồng hoa anh đào */
+	}
+	/* 2. CÔNG TẮC ĐỂ BẮT ĐẦU RƠI */
+	#petal-container.start-falling > div {
+    	    /* Animation CHỈ chạy khi container có class 'start-falling' */
+    	    animation: fall 10s linear infinite;
+	}
+
+	/* 3. KỊCH BẢN RƠI (FALL) */
+	@keyframes fall {
+    	    0% {
+            	/* Bắt đầu ở trên, không xoay */
+        	transform: translateX(0vw) rotateZ(0deg);
+        	opacity: 1;
+    	    }
+    	    50% {
+        	/* Ở giữa: trôi dạt sang bên phải */
+        	transform: translateX(10vw) rotateZ(180deg);
+    	    }
+    	    100% {
+        	/* Kết thúc: ở dưới, trôi dạt sang trái, mờ đi */
+        	top: 130%; 
+        	transform: translateX(-5vw) rotateZ(360deg);
+        	opacity: 0;
+    	    }
+	}
+	
+	/* TẠO HIỆU ỨNG NGẪU NHIÊN */
+	#petal-container div:nth-child(1) {
+    	    left: 10%; /* Vị trí ngang */
+    	    animation-duration: 10s; /* Tốc độ rơi */
+    	    animation-delay: -5s;  /* Bắt đầu trễ (âm) */
+	    text-shadow: 0 0 10px #ffacca;
+	}
+	#petal-container div:nth-child(2) {
+    	    left: 20%;
+    	    animation-duration: 8s;
+    	    animation-delay: -2s;
+    	    font-size: 18px; /* Kích thước khác */
+	    text-shadow: 0 0 5px #ffacca;
+	}
+	#petal-container div:nth-child(3) {
+    	    left: 30%;
+    	    animation-duration: 12s;
+    	    animation-delay: -10s;
+	    text-shadow: 0 0 15px #ffacca;
+	}
+	#petal-container div:nth-child(4) {
+    	    left: 40%;
+    	    animation-duration: 7s;
+    	    animation-delay: -3s;
+    	    font-size: 22px;
+	    text-shadow: 0 0 8px #ffacca;
+	}
+	#petal-container div:nth-child(5) {
+    	    left: 50%;
+    	    animation-duration: 9s;
+    	    animation-delay: -1s;
+	    text-shadow: 0 0 12px #ffacca;
+	}
+	#petal-container div:nth-child(6) {
+    	    left: 60%;
+    	    animation-duration: 11s;
+    	    animation-delay: -7s;
+	    text-shadow: 0 0 6px #ffacca;
+	}
+	#petal-container div:nth-child(7) {
+    	left: 70%;
+ 	    animation-duration: 8s;
+  	    animation-delay: -4s;
+  	    font-size: 16px;
+	    text-shadow: 0 0 14px #ffacca;
+	}
+	#petal-container div:nth-child(8) {
+   	    left: 80%;
+   	    animation-duration: 10s;
+   	    animation-delay: -8s;
+	    text-shadow: 0 0 10px #ffacca;
+	}
+	#petal-container div:nth-child(9) {
+  	    left: 90%;
+   	    animation-duration: 13s;
+   	    animation-delay: -6s;
+ 	    font-size: 20px;
+	    text-shadow: 0 0 7px #ffacca;
+	}
+	#petal-container div:nth-child(10) {
+ 	    left: 5%;
+ 	    animation-duration: 9s;
+	    animation-delay: -9s;
+	    text-shadow: 0 0 15px #ffacca;
+	}
+	
+	/* Thêm 10 cánh hoa ngẫu nhiên nữa */
+	#petal-container div:nth-child(11) {
+    	    left: 15%; /* Vị trí ngang */
+    	    animation-duration: 11s; /* Tốc độ rơi */
+    	    animation-delay: -11s;  /* Bắt đầu trễ (âm) */
+    	    font-size: 20px;
+	    text-shadow: 0 0 5px #ffacca;
+	}
+	#petal-container div:nth-child(12) {
+    	    left: 25%;
+    	    animation-duration: 7s;
+    	    animation-delay: -6s;
+    	    font-size: 17px;
+	    text-shadow: 0 0 12px #ffacca;
+	}
+	#petal-container div:nth-child(13) {
+    	    left: 35%;
+    	    animation-duration: 10s;
+    	    animation-delay: -3s;
+	    text-shadow: 0 0 16px #ffacca;
+	}
+	#petal-container div:nth-child(14) {
+    	    left: 45%;
+    	    animation-duration: 13s;
+    	    animation-delay: -9s;
+    	    font-size: 23px;
+	    text-shadow: 0 0 9px #ffacca;
+	}
+	#petal-container div:nth-child(15) {
+    	    left: 55%;
+    	    animation-duration: 8s;
+    	    animation-delay: -1s;
+	    text-shadow: 0 0 11px #ffacca;
+	}
+	#petal-container div:nth-child(16) {
+    	    left: 65%;
+    	    animation-duration: 12s;
+    	    animation-delay: -4s;
+    	    font-size: 19px;
+	    text-shadow: 0 0 7px #ffacca;
+	}
+	#petal-container div:nth-child(17) {
+    	    left: 75%;
+    	    animation-duration: 7s;
+    	    animation-delay: -12s;
+	    text-shadow: 0 0 13px #ffacca;
+	}
+	#petal-container div:nth-child(18) {
+    	    left: 85%;
+    	    animation-duration: 10s;
+    	    animation-delay: -2s;
+    	    font-size: 21px;
+	    text-shadow: 0 0 18px #ffacca;
+	}
+	#petal-container div:nth-child(19) {
+    	    left: 95%;
+    	    animation-duration: 8s;
+    	    animation-delay: -8s;
+	    text-shadow: 0 0 8px #ffacca;
+	}
+	#petal-container div:nth-child(20) {
+    	    left: 2%;
+    	    animation-duration: 11s;
+    	    animation-delay: -10s;
+    	    font-size: 18px;
+	    text-shadow: 0 0 10px #ffacca;
+	}
+
+	@keyframes fade-in {
+            /* 'from' (từ 0%) là opacity: 0 (đã có sẵn) */
+            
+            /* 'to' (đến 100%) là hiện rõ */
+            to {
+                opacity: 1;
+            }
+        }
+	
+	@keyframes animate-gradient {
+  		to {
+   	 		background-position: 200%;
+  		}
+	}	
+  
+        /* Kịch bản MỚI: Di chuyển MẶT NẠ (để lộ chữ) */
+        @keyframes reveal-text {
+            from {
+                clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+            }
+            to {
+                clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+            }
+        }
+
+        /* Kịch bản MỚI: Di chuyển CON TRỎ */
+        @keyframes move-cursor {
+            from {
+                transform: translateX(0);
+            }
+            to {
+                /* Di chuyển 100% chiều rộng của chữ (15 ký tự) */
+                transform: translateX(15ch); 
+            }
+        }
+
+
+	
+	@keyframes slide-up {
+            /* Bắt đầu: Ẩn (opacity: 0) và ở Dưới (50px) */
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            
+            /* Kết thúc: Hiện (opacity: 1) và ở vị trí Gốc (0px) */
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes di-chuyen {
+            /* (Toàn bộ @keyframes của bạn giữ nguyên ở đây) */
+            0% { transform: translateX(-56vw) translateY(0) scale(1); }
+            1% { transform: translateX(-56vw) translateY(0) scale(1); }
+            1.075% { transform: translateX(-51vw) translateY(-5px) scale(1); }
+            1.15% { transform: translateX(-46vw) translateY(5px) scale(1); } /* Sửa: thêm 'vw' và 'px' */
+            1.225% { transform: translateX(-41vw) translateY(-5px) scale(1); }
+            1.30% { transform: translateX(-36vw) translateY(5px) scale(1); }
+            1.375% { transform: translateX(-31vw) translateY(-5px) scale(1); }
+            1.45% { transform: translateX(-26vw) translateY(5px) scale(1); }
+            1.525% { transform: translateX(-21vw) translateY(-5px) scale(1); }
+            1.60% { transform: translateX(-16vw) translateY(0px) scale(1); }
+            
+            3% {transform: translateX(-16vw) translateY(0px) scale(1);}
+	    3.5% {transform: translateX(-16vw) translateY(-5px) scale(1.125);}
+	    4% {transform: translateX(-16vw) translateY(0px) scale(1.25);}
+	    4.5% {transform: translateX(-16vw) translateY(-5px) scale(1.375);}
+	    5% {transform: translateX(-16vw) translateY(0px) scale(1.5);}
+	    5.5% {transform: translateX(-16vw) translateY(-5px) scale(1.625);}
+	    6% {transform: translateX(-16vw) translateY(0px) scale(1.75);}
+	    6.5% {transform: translateX(-16vw) translateY(-5px) scale(1.875);}
+            7% {transform: translateX(-16vw) translateY(0px) scale(2);}
+            100% {transform: translateX(-16vw) translateY(0px) scale(2);}
+        }
+    </style>
+</head>
+<body>
+
+    <div id="petal-container">
+        <div>🌸</div>
+        <div>🌸</div>
+        <div>🌸</div>
+        <div>🌸</div>
+        <div>🌸</div>
+        <div>🌸</div>
+        <div>🌸</div>
+        <div>🌸</div>
+        <div>🌸</div>
+        <div>🌸</div>
+        <div>🌸</div>
+        <div>🌸</div>
+        <div>🌸</div>
+        <div>🌸</div>
+        <div>🌸</div>
+        <div>🌸</div>
+        <div>🌸</div>
+        <div>🌸</div>
+        <div>🌸</div>
+        <div>🌸</div>
+        </div>
+
+    <button id="play-button">Bắt đầu</button>    
+
+    <div id="container">
+        <img id="meo" src="cat.png">
+	<img id="rose" src="rose.png">
+        <img id="point" src="pointing.png">
+	<img id="spin" src="spin.gif" alt="Ảnh động GIF">
+    </div>    
+
+    <audio id="footsteps" src="Footsteps.mp3"></audio>
+    <audio id="boom" src="VineBoom.mp3"></audio>
+    <audio id="roseSFX" src="roseSFX.mp3"></audio>
+    <audio id="typingSFX" src="TypingSFX.mp3"></audio>
+    <audio id="magic" src="magic.mp3"></audio>
+    <audio id="her" src="JVKE-her.mp3"></audio>
+
+    <p id="text1">Chúc các chị em</p>
+    <p id="text2">12Anh1</p>
+    <p id="text3">20/10</p>
+    <p id="text4">Vui vẻ 🤗😁</p>
+    <p id="text5">Thành công 💪💯</p>
+    <p id="text6">Nhiều tiền 🤑💰</p>
+    <p id="cre">cre:Hoàng Nguyễn</p>
+    
+    <script>
+        // 1. Tìm tất cả diễn viên (như cũ)
+        const playButton = document.getElementById('play-button');
+        const container = document.getElementById('container');
+        const sound = document.getElementById('footsteps'); // Đã sửa 'f' thường
+	const sound2 = document.getElementById('boom');
+	const sound3 = document.getElementById('roseSFX');
+	const sound4 = document.getElementById('typingSFX');
+	const sound5 = document.getElementById('magic');
+	const sound6 = document.getElementById('her');
+	const hand = document.getElementById('point');
+	const rose = document.getElementById('rose');
+	const text1 = document.getElementById('text1');
+	const text2 = document.getElementById('text2');
+	const text3 = document.getElementById('text3');
+	const text4 = document.getElementById('text4');
+	const text5 = document.getElementById('text5');
+	const text6 = document.getElementById('text6');
+	const petalContainer = document.getElementById('petal-container');
+	const spin = document.getElementById('spin'); // <-- THÊM DÒNG NÀY
+	const meo = document.getElementById('meo');
+
+        // 2. TẠO HÀM MỚI: Dùng để phát lại âm thanh ngay lập tức
+        function playStepSound() {
+            sound.currentTime = 0; // Tua về 0 giây
+            sound.play();
+        }
+	
+	function playBoomSound() {
+            sound2.currentTime = 0; // Tua về 0 giây
+            sound2.play();
+        }
+	
+	function playRoseSound() {
+            sound3.currentTime = 0; // Tua về 0 giây
+            sound3.play();
+        }
+
+	function playTypingSound() {
+            sound4.currentTime = 0; // Tua về 0 giây
+            sound4.play();
+        }
+	
+	function playMagicSound() {
+            sound5.currentTime = 0; // Tua về 0 giây
+            sound5.play();
+        }
+
+	function playHerSound() {
+            sound6.currentTime = 0; // Tua về 0 giây
+            sound6.play();
+        }
+
+        // 3. Lắng nghe sự kiện click (như cũ)
+        playButton.addEventListener('click', () => {
+
+            // Chạy animation, ẩn nút, khóa tương tác (như cũ)
+            container.classList.add('run-animation');
+            playButton.style.display = 'none';
+            document.body.style.pointerEvents = 'none';
+
+            // 4. LÊN KỊCH BẢN ÂM THANH
+            // Animation của bạn là 100s (100,000 ms)
+            // Chúng ta sẽ gọi hàm playStepSound() tại các mốc %
+            // 1.075% của 100,000ms = 1075ms
+            // 1.15%  của 100,000ms = 1150ms
+            // ...v...v...
+
+	    setTimeout(playStepSound, 1000);
+            setTimeout(playStepSound, 1150); // Bước 1 (lúc 1.15s)
+            setTimeout(playStepSound, 1300); // Bước 2
+            setTimeout(playStepSound, 1450); // Bước 3
+            setTimeout(playStepSound, 1600); // Bước 4 (đặt chân cuối)
+	    setTimeout(playStepSound, 4000);
+	    setTimeout(playStepSound, 5000);
+	    setTimeout(playStepSound, 6000);
+	    setTimeout(playStepSound, 7000);
+	    setTimeout(() => {
+                sound.pause();
+                sound.currentTime = 0; // Tua về 0 giây
+            }, 7300); 
+
+	    setTimeout(playBoomSound, 7700);
+	    setTimeout(() => {
+                sound2.pause();
+                sound2.currentTime = 0; // Tua về 0 giây
+            }, 10000);
+
+	    setTimeout(() => {
+                hand.classList.add('show');
+            }, 8000);
+		
+	    setTimeout(() => {
+                rose.classList.add('show');
+            }, 10000);
+	    
+	    setTimeout(playRoseSound, 10000);
+	    setTimeout(() => {
+                sound3.pause();
+                sound3.currentTime = 0; // Tua về 0 giây
+            }, 11000);
+	    
+ 	    setTimeout(() => {
+                text1.classList.add('show-text');
+            }, 12000);
+	    setTimeout(playTypingSound, 12000);
+	    setTimeout(() => {
+                sound4.pause();
+                sound4.currentTime = 0; // Tua về 0 giây
+            }, 13500);
+
+	    setTimeout(() => {
+                text2.classList.add('show-text');
+            }, 14000);
+	    setTimeout(playMagicSound, 14000);
+	    setTimeout(() => {
+                sound5.pause();
+                sound5.currentTime = 0; // Tua về 0 giây
+            }, 15200);
+
+	    setTimeout(() => {
+                text3.classList.add('show-text');
+            }, 15000);
+	    setTimeout(playTypingSound, 15000);
+	    setTimeout(() => {
+                sound4.pause();
+                sound4.currentTime = 0; // Tua về 0 giây
+            }, 16000);
+
+	    setTimeout(() => {
+                text4.classList.add('show-text');
+            }, 17000);
+	    setTimeout(playTypingSound, 17000);
+	    setTimeout(() => {
+                sound4.pause();
+                sound4.currentTime = 0; // Tua về 0 giây
+            }, 18500);
+
+	    setTimeout(() => {
+                text5.classList.add('show-text');
+            }, 19000);
+	    setTimeout(playTypingSound, 19000);
+	    setTimeout(() => {
+                sound4.pause();
+                sound4.currentTime = 0; // Tua về 0 giây
+            }, 20500);
+
+	    setTimeout(() => {
+                text6.classList.add('show-text');
+            }, 21000);
+	    setTimeout(playTypingSound, 21000);
+	    setTimeout(() => {
+                sound4.pause();
+                sound4.currentTime = 0; // Tua về 0 giây
+            }, 22500);
+	    setTimeout(() => {
+        	petalContainer.classList.add('start-falling');
+    	    }, 23000); 
+
+	    setTimeout(() => {
+        	meo.classList.add('hide'); // Ẩn con mèo
+        	spin.classList.add('show'); // Hiện GIF
+    	    }, 24000);
+		
+	    setTimeout(playHerSound, 24000);
+	    setTimeout(() => {
+                sound6.pause();
+                sound6.currentTime = 0; // Tua về 0 giây
+            }, 195000);
+	    
+	    /*đứng*/
+	    setTimeout(() => {
+        	spin.classList.remove('show'); // Hoặc spin.classList.add('hide'); nếu bạn đã tạo class này
+                meo.classList.remove('hide'); // Hiện GIF
+    	    }, 32750);
+		
+	    /*xoay*/
+	    setTimeout(() => {
+        	meo.classList.add('hide');
+                spin.classList.add('show'); 
+    	    }, 34000);
+
+	    /*đứng*/
+	    setTimeout(() => {
+        	spin.classList.remove('show'); // Hoặc spin.classList.add('hide'); nếu bạn đã tạo class này
+                meo.classList.remove('hide'); // Hiện GIF
+    	    }, 36100);
+
+	    /*xoay*/
+	    setTimeout(() => {
+        	meo.classList.add('hide');
+                spin.classList.add('show'); 
+    	    }, 37600);
+
+	    /*đứng*/
+	    setTimeout(() => {
+        	spin.classList.remove('show'); // Hoặc spin.classList.add('hide'); nếu bạn đã tạo class này
+                meo.classList.remove('hide'); // Hiện GIF
+    	    }, 39500);
+
+	    /*xoay*/
+	    setTimeout(() => {
+        	meo.classList.add('hide');
+                spin.classList.add('show'); 
+    	    }, 40700);
+
+	    /*đứng*/
+	    setTimeout(() => {
+        	spin.classList.remove('show'); // Hoặc spin.classList.add('hide'); nếu bạn đã tạo class này
+                meo.classList.remove('hide'); // Hiện GIF
+    	    }, 42800);
+
+	    /*xoay*/
+	    setTimeout(() => {
+        	meo.classList.add('hide');
+                spin.classList.add('show'); 
+    	    }, 44000);
+		
+	    /*đứng*/
+	    setTimeout(() => {
+        	spin.classList.remove('show'); // Hoặc spin.classList.add('hide'); nếu bạn đã tạo class này
+                meo.classList.remove('hide'); // Hiện GIF
+    	    }, 54800);
+
+	    /*xoay*/
+	    setTimeout(() => {
+        	meo.classList.add('hide');
+                spin.classList.add('show'); 
+    	    }, 57500);
+
+	    /*đứng*/
+	    setTimeout(() => {
+        	spin.classList.remove('show'); // Hoặc spin.classList.add('hide'); nếu bạn đã tạo class này
+                meo.classList.remove('hide'); // Hiện GIF
+    	    }, 71000);
+
+	    /*xoay*/
+	    setTimeout(() => {
+        	meo.classList.add('hide');
+                spin.classList.add('show'); 
+    	    }, 75500);
+
+	    /*đứng*/
+	    setTimeout(() => {
+        	spin.classList.remove('show'); // Hoặc spin.classList.add('hide'); nếu bạn đã tạo class này
+                meo.classList.remove('hide'); // Hiện GIF
+    	    }, 84000);
+
+	    /*xoay*/
+	    setTimeout(() => {
+        	meo.classList.add('hide');
+                spin.classList.add('show'); 
+    	    }, 97500);
+
+	    /*đứng*/
+	    setTimeout(() => {
+        	spin.classList.remove('show'); // Hoặc spin.classList.add('hide'); nếu bạn đã tạo class này
+                meo.classList.remove('hide'); // Hiện GIF
+    	    }, 98000);
+		
+	    /*xoay*/
+	    setTimeout(() => {
+        	meo.classList.add('hide');
+                spin.classList.add('show'); 
+    	    }, 110000);
+
+	    /*đứng*/
+	    setTimeout(() => {
+        	spin.classList.remove('show'); // Hoặc spin.classList.add('hide'); nếu bạn đã tạo class này
+                meo.classList.remove('hide'); // Hiện GIF
+    	    }, 112700);
+	
+	    /*xoay*/
+	    setTimeout(() => {
+        	meo.classList.add('hide');
+                spin.classList.add('show'); 
+    	    }, 114000);
+
+	    /*đứng*/
+	    setTimeout(() => {
+        	spin.classList.remove('show'); // Hoặc spin.classList.add('hide'); nếu bạn đã tạo class này
+                meo.classList.remove('hide'); // Hiện GIF
+    	    }, 116000);
+
+	    /*xoay*/
+	    setTimeout(() => {
+        	meo.classList.add('hide');
+                spin.classList.add('show'); 
+    	    }, 117300);
+
+	    /*đứng*/
+	    setTimeout(() => {
+        	spin.classList.remove('show'); // Hoặc spin.classList.add('hide'); nếu bạn đã tạo class này
+                meo.classList.remove('hide'); // Hiện GIF
+    	    }, 119500);
+
+	    /*xoay*/
+	    setTimeout(() => {
+        	meo.classList.add('hide');
+                spin.classList.add('show'); 
+    	    }, 120700);
+
+	    /*đứng*/
+	    setTimeout(() => {
+        	spin.classList.remove('show'); // Hoặc spin.classList.add('hide'); nếu bạn đã tạo class này
+                meo.classList.remove('hide'); // Hiện GIF
+    	    }, 122700);
+
+	    /*xoay*/
+	    setTimeout(() => {
+        	meo.classList.add('hide');
+                spin.classList.add('show'); 
+    	    }, 124000);
+
+	    /*đứng*/
+	    setTimeout(() => {
+        	spin.classList.remove('show'); // Hoặc spin.classList.add('hide'); nếu bạn đã tạo class này
+                meo.classList.remove('hide'); // Hiện GIF
+    	    }, 134800);
+
+	    /*xoay*/
+	    setTimeout(() => {
+        	meo.classList.add('hide');
+                spin.classList.add('show'); 
+    	    }, 138000);
+
+	    /*đứng*/
+	    setTimeout(() => {
+        	spin.classList.remove('show'); // Hoặc spin.classList.add('hide'); nếu bạn đã tạo class này
+                meo.classList.remove('hide'); // Hiện GIF
+    	    }, 151000);
+
+	    /*xoay*/
+	    setTimeout(() => {
+        	meo.classList.add('hide');
+                spin.classList.add('show'); 
+    	    }, 155500);
+
+	    /*đứng*/
+	    setTimeout(() => {
+        	spin.classList.remove('show'); // Hoặc spin.classList.add('hide'); nếu bạn đã tạo class này
+                meo.classList.remove('hide'); // Hiện GIF
+    	    }, 164500);
+
+	    /*xoay*/
+	    setTimeout(() => {
+        	meo.classList.add('hide');
+                spin.classList.add('show'); 
+    	    }, 168500);
+
+	    /*đứng*/
+	    setTimeout(() => {
+        	spin.classList.remove('show'); // Hoặc spin.classList.add('hide'); nếu bạn đã tạo class này
+                meo.classList.remove('hide'); // Hiện GIF
+    	    }, 174700);
+
+	    /*xoay*/
+	    setTimeout(() => {
+        	meo.classList.add('hide');
+                spin.classList.add('show'); 
+    	    }, 177700);
+
+        });
+    </script>
+</body>
+</html>
